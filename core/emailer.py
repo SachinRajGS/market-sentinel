@@ -55,6 +55,19 @@ def send_alert_email(alerts, headline_prices, subject=None):
                                     for a in alerts), "plain"))
     msg.attach(MIMEText(build_html(alerts, headline_prices), "html"))
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as s:
-        s.login(user, pwd)
-        s.sendmail(user, [to], msg.as_string())
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as s:
+            s.login(user, pwd)
+            s.sendmail(user, [to], msg.as_string())
+    except smtplib.SMTPAuthenticationError:
+        # safe diagnostics — no secret values are printed
+        local, _, domain = user.partition("@")
+        print("AUTH DEBUG:"
+              f" user_local_len={len(local)}"
+              f" user_domain={domain or 'MISSING'}"
+              f" user_first_char={local[:1]}"
+              f" pwd_len={len(pwd)}"
+              f" pwd_all_lowercase_letters={pwd.isalpha() and pwd.islower()}")
+        print("A Gmail app password is 16 lowercase letters, and must be "
+              "generated on the SAME account as GMAIL_USER (with 2FA enabled).")
+        raise
