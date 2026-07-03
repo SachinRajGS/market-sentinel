@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "anomaly_alerts": true,
+    "technical_alerts": true,
+    "cooldown_hours": 6
+  },
+  "targets": [
+    {"asset": "bitcoin", "type": "price_above", "value": 150000, "currency": "usd", "note": "example — edit or delete"},
+    {"asset": "RELIANCE.NS", "type": "pct_move", "value": 3, "note": "alert on any ±3% day move"}
+  ]
+}
