@@ -33,9 +33,16 @@ def build_html(alerts, headline_prices):
 
 
 def send_alert_email(alerts, headline_prices, subject=None):
-    user = os.environ["GMAIL_USER"]
-    pwd = os.environ["GMAIL_APP_PASSWORD"]
-    to = os.environ.get("ALERT_TO", user)
+    # sanitize: app passwords are 16 letters — strip whitespace/newlines that
+    # sneak in via copy-paste, and the display-only spaces Google shows
+    user = os.environ["GMAIL_USER"].strip()
+    pwd = os.environ["GMAIL_APP_PASSWORD"].strip().replace(" ", "")
+    to = os.environ.get("ALERT_TO", user).strip()
+    if "@" not in user:
+        user += "@gmail.com"
+    if len(pwd) != 16:
+        print(f"WARNING: app password is {len(pwd)} chars after cleanup — "
+              "a Gmail app password is exactly 16. Re-check the secret.")
 
     top = max(a["severity"] for a in alerts)
     subject = subject or (f"{'🚨' if top >= 3 else '⚠️' if top >= 2 else '🔔'} "
